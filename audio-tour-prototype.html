@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Tour App. Prototype</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f3ee;
+      --surface: #ffffff;
+      --surface2: #f0ede6;
+      --border: rgba(0,0,0,0.1);
+      --border2: rgba(0,0,0,0.18);
+      --text: #1a1a18;
+      --text2: #6b6a65;
+      --text3: #9e9d98;
+      --blue: #185FA5;
+      --blue-light: #E6F1FB;
+      --green: #3B6D11;
+      --green-light: #EAF3DE;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 60px;
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+      max-width: 480px;
+    }
+    .page-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: var(--blue-light);
+      color: var(--blue);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+    }
+    .page-title {
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+    .page-sub {
+      font-size: 15px;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    /* PHONE FRAME */
+    .demo-area {
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .phone {
+      width: 320px;
+      height: 660px;
+      border: 2px solid rgba(0,0,0,0.15);
+      border-radius: 44px;
+      overflow: hidden;
+      position: relative;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+    }
+
+    .notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 28px;
+      background: var(--surface);
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      z-index: 100;
+      border: 2px solid rgba(0,0,0,0.1);
+      border-top: none;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text2);
+      flex-shrink: 0;
+      margin-top: 12px;
+    }
+
+    .screen {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* NAV BAR */
+    .nav-bar {
+      display: flex;
+      border-top: 0.5px solid var(--border);
+      flex-shrink: 0;
+      background: var(--surface);
+      padding-bottom: 8px;
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 0 4px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text3);
+      font-size: 10px;
+      gap: 3px;
+      transition: color 0.15s;
+      font-family: inherit;
+    }
+    .nav-item.active { color: var(--blue); }
+    .nav-item i { font-size: 22px; }
+
+    /* SCREEN: TOURS */
+    .screen-header {
+      padding: 14px 16px 8px;
+      flex-shrink: 0;
+    }
+    .screen-title { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 2px; letter-spacing: -0.02em; }
+    .screen-sub { font-size: 12px; color: var(--text2); }
+
+    .screen-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 16px 16px;
+      scrollbar-width: none;
+    }
+    .screen-scroll::-webkit-scrollbar { display: none; }
+
+    .tour-card {
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      background: var(--surface);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .tour-card:hover { border-color: var(--border2); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .tour-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .tour-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .tour-price { font-size: 14px; font-weight: 600; color: var(--blue); }
+    .tour-price.owned { color: var(--green); }
+    .tour-meta { font-size: 11px; color: var(--text2); display: flex; gap: 10px; margin-bottom: 8px; }
+    .tour-meta span { display: flex; align-items: center; gap: 3px; }
+    .tour-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+    .tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--surface2); color: var(--text2); border: 0.5px solid var(--border); }
+    .btn-primary {
+      width: 100%; margin-top: 10px; padding: 9px;
+      background: var(--blue); color: white; border: none;
+      border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+      cursor: pointer; font-family: inherit; transition: background 0.15s;
+    }
+    .btn-primary:hover { background: #0C447C; }
+    .btn-primary.owned { background: var(--green); }
+    .btn-primary.owned:hover { background: #27500A; }
+
+    /* SCREEN: ACTIVE (MAP) */
+    .map-view {
+      position: relative;
+      flex: 1;
+      background: #e4edd8;
+      overflow: hidden;
+    }
+    .map-svg { width: 100%; height: 100%; }
+    .gps-ring {
+      position: absolute;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: rgba(24,95,165,0.15);
+      top: 48%; left: 46%;
+      transform: translate(-50%,-50%);
+      animation: pulse 2s infinite;
+      z-index: 8;
+    }
+    .gps-dot {
+      position: absolute;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--blue);
+      border: 3px solid white;
+      top: 48%; left: 46%;
+      transform: translate(-50%,-50%);
+      z-index: 10;
+      box-shadow: 0 2px 6px rgba(24,95,165,0.4);
+    }
+    @keyframes pulse {
+      0% { transform: translate(-50%,-50%) scale(1); opacity: 0.7; }
+      100% { transform: translate(-50%,-50%) scale(4); opacity: 0; }
+    }
+    .poi-marker {
+      position: absolute;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600;
+      cursor: pointer;
+      border: 2.5px solid white;
+      transition: transform 0.15s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      z-index: 9;
+    }
+    .poi-marker:hover { transform: translate(-50%,-50%) scale(1.2) !important; }
+    .poi-marker.active { background: var(--blue); color: white; }
+    .poi-marker.visited { background: var(--green); color: white; }
+    .poi-marker.unvisited { background: white; color: var(--text2); }
+
+    .gps-alert {
+      position: absolute;
+      top: 10px; left: 10px; right: 10px;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      font-size: 11px; color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+      z-index: 20;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .gps-dot-sm {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green); flex-shrink: 0;
+      animation: blink 1.5s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    /* BOTTOM SHEET */
+    .bottom-sheet {
+      background: var(--surface);
+      border-top: 0.5px solid var(--border);
+      padding: 12px 16px 14px;
+      flex-shrink: 0;
+    }
+    .sheet-handle {
+      width: 32px; height: 4px;
+      background: var(--border2);
+      border-radius: 2px;
+      margin: 0 auto 10px;
+    }
+    .stop-pills {
+      display: flex; gap: 5px;
+      overflow-x: auto; scrollbar-width: none;
+      margin-bottom: 10px;
+    }
+    .stop-pills::-webkit-scrollbar { display: none; }
+    .stop-pill {
+      flex-shrink: 0; padding: 3px 9px;
+      border-radius: 12px; font-size: 10px; font-weight: 500;
+      cursor: pointer;
+      border: 0.5px solid var(--border);
+      background: var(--surface2); color: var(--text2);
+      font-family: inherit;
+    }
+    .stop-pill.active { background: var(--blue-light); border-color: var(--blue); color: var(--blue); }
+    .stop-pill.done { background: var(--green-light); border-color: var(--green); color: var(--green); }
+
+    .now-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
+    .stop-title-text { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .stop-desc-text { font-size: 11px; color: var(--text2); line-height: 1.5; margin-bottom: 10px; }
+
+    .progress-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .prog-time { font-size: 10px; color: var(--text3); min-width: 26px; }
+    .prog-track { flex: 1; height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--blue); border-radius: 2px; transition: width 0.8s linear; }
+
+    .controls { display: flex; align-items: center; justify-content: space-between; }
+    .ctrl { background: none; border: none; cursor: pointer; padding: 6px; color: var(--text2); border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: background 0.1s; }
+    .ctrl:hover { background: var(--surface2); }
+    .play-btn {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--blue); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: white; transition: background 0.15s;
+    }
+    .play-btn:hover { background: #0C447C; }
+
+    /* SCREEN: PROFILE */
+    .avatar {
+      width: 50px; height: 50px; border-radius: 50%;
+      background: var(--blue-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 600; color: var(--blue);
+    }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .stat-card {
+      background: var(--surface2); border-radius: var(--radius-sm); padding: 14px;
+    }
+    .stat-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+    .stat-val { font-size: 24px; font-weight: 600; color: var(--text); }
+
+    /* SIDE INFO */
+    .side-info {
+      max-width: 260px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-top: 10px;
+    }
+    .info-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    .info-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .info-card-title i { font-size: 16px; color: var(--blue); }
+    .info-list { list-style: none; }
+    .info-list li {
+      font-size: 12px; color: var(--text2); padding: 4px 0;
+      border-bottom: 0.5px solid var(--border);
+      display: flex; align-items: center; gap: 6px; line-height: 1.5;
+    }
+    .info-list li:last-child { border-bottom: none; }
+    .info-list i { font-size: 13px; color: var(--text3); flex-shrink: 0; }
+    .footer-note {
+      font-size: 11px; color: var(--text3); text-align: center; margin-top: 32px;
+      line-height: 1.6; max-width: 480px;
+    }
+    .footer-note a { color: var(--blue); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="page-badge">Prototype</div>
+    <h1 class="page-title">Audio Tour App</h1>
+    <p class="page-sub">Klikbaar prototype van de mobiele app. Navigeer via de tabbar onderaan het telefoonscherm.</p>
+  </header>
+
+  <div class="demo-area">
+
+    <!-- PHONE -->
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span>9:41</span>
+        <span style="display:flex;gap:5px;align-items:center;">
+          <i class="ti ti-wifi" style="font-size:13px"></i>
+          <i class="ti ti-battery-2" style="font-size:13px"></i>
+        </span>
+      </div>
+      <div class="screen" id="screen"></div>
+      <nav class="nav-bar">
+        <button class="nav-item" id="nav-tours" onclick="showScreen('tours')">
+          <i class="ti ti-map-2"></i>Tours
+        </button>
+        <button class="nav-item" id="nav-active" onclick="showScreen('active')">
+          <i class="ti ti-player-play"></i>Actief
+        </button>
+        <button class="nav-item" id="nav-profile" onclick="showScreen('profile')">
+          <i class="ti ti-user"></i>Profiel
+        </button>
+      </nav>
+    </div>
+
+    <!-- SIDE INFO -->
+    <div class="side-info">
+      <div class="info-card">
+        <div class="info-card-title"><i class="ti ti-device-mobile"></i>Dit prototype toont</div>
+        <ul class="info-list">
+          <li><i class="ti ti-check"></i>Tourlijst met koopprijzen</li>
+          <li><i class="ti ti-check"></i>GPS-kaart met stops</li>
+          <li><i class="ti ti-check"></i>Audiospeler met voortgang</li>
+          <li><i class="ti ti-check"></i>Gebruikersprofiel</li>
+          <li><i class="ti ti-check"></i>Koop. en startflow</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title"><i class="ti ti-rocket"></i>Echte versie bevat</div>
+        <ul class="info-list">
+          <li><i class="ti ti-map-pin"></i>Echte GPS locatie</li>
+          <li><i class="ti ti-volume"></i>Ingesproken audio per stop</li>
+          <li><i class="ti ti-credit-card"></i>Betaling via Stripe</li>
+          <li><i class="ti ti-cloud-upload"></i>Beheerpaneel voor tours</li>
+          <li><i class="ti ti-wifi-off"></i>Offline modus</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title"><i class="ti ti-currency-euro"></i>Verdienmodel</div>
+        <ul class="info-list">
+          <li><i class="ti ti-user"></i>Toerist betaalt per tour</li>
+          <li><i class="ti ti-percentage"></i>~10-15% commissie mogelijk</li>
+          <li><i class="ti ti-building"></i>~€10-35/maand hosting</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="footer-note">
+    Gebouwd als prototype met Claude. Volgende stap: bouwen met echte GPS + audio via een Progressive Web App.<br>
+    <a href="https://claude.ai" target="_blank">claude.ai</a>
+  </p>
+
+<script>
+const tours = [
+  { id:1, name:"Historisch stadscentrum", price:"€4,99", duration:"90 min", stops:7, tags:["Familie","Cultuur"], owned:true },
+  { id:2, name:"Havenbuurt &amp; moderne kunst", price:"€3,99", duration:"60 min", stops:5, tags:["Kunst","Fotografie"], owned:false },
+  { id:3, name:"Culinaire wandeling", price:"€5,99", duration:"2 uur", stops:9, tags:["Eten","Lokaal"], owned:false },
+];
+
+const stops = [
+  { id:1, name:"Grote Markt", desc:"Het kloppend hart van de stad, omringd door historische gevels uit de 16e eeuw.", x:"46%", y:"44%", state:"active" },
+  { id:2, name:"Stadhuis", desc:"Gotisch stadhuis uit 1421, een van de best bewaarde in Nederland.", x:"62%", y:"30%", state:"visited" },
+  { id:3, name:"Sint-Janskerk", desc:"Bekend om zijn unieke glas-in-loodramen.", x:"33%", y:"57%", state:"unvisited" },
+  { id:4, name:"Vismarkt", desc:"Eeuwenoude vismarkt aan de grachten.", x:"67%", y:"60%", state:"unvisited" },
+  { id:5, name:"Begijnhof", desc:"Rustig hofje met middeleeuwse sfeer.", x:"22%", y:"34%", state:"unvisited" },
+];
+
+let playing = false, progress = 38, currentStop = 0;
+let progressTimer = null;
+
+function toursHTML() {
+  return `
+    <div class="screen-header">
+      <div class="screen-title">Tours</div>
+      <div class="screen-sub">Den Haag · 3 beschikbaar</div>
+    </div>
+    <div class="screen-scroll">
+      ${tours.map(t => `
+        <div class="tour-card">
+          <div class="tour-card-header">
+            <div class="tour-name">${t.name}</div>
+            <div class="tour-price ${t.owned?'owned':''}">${t.owned ? 'Gekocht ✓' : t.price}</div>
+          </div>
+          <div class="tour-meta">
+            <span><i class="ti ti-clock" style="font-size:11px"></i>${t.duration}</span>
+            <span><i class="ti ti-map-pin" style="font-size:11px"></i>${t.stops} stops</span>
+          </div>
+          <div class="tour-tags">${t.tags.map(tag=>`<span class="tag">${tag}</span>`).join("")}</div>
+          <button class="btn-primary ${t.owned?'owned':''}" onclick="${t.owned ? "showScreen('active')" : `buyTour(${t.id})`}">
+            ${t.owned ? '▶ Start tour' : 'Koop nu ' + t.price}
+          </button>
+        </div>`).join("")}
+    </div>`;
+}
+
+function activeHTML() {
+  return `
+    <div class="map-view">
+      <svg class="map-svg" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg">
+        <rect width="320" height="240" fill="#e4edd8"/>
+        <path d="M0 120 Q50 108 100 120 Q150 132 200 120 Q250 108 320 120" stroke="#cdd9b8" stroke-width="30" fill="none"/>
+        <path d="M155 0 Q148 50 152 100 Q156 150 150 200 Q145 225 155 240" stroke="#cdd9b8" stroke-width="24" fill="none"/>
+        <rect x="10" y="14" width="55" height="38" rx="4" fill="#d0deb8" stroke="#b8cda0" stroke-width="0.5"/>
+        <rect x="80" y="10" width="75" height="45" rx="4" fill="#d0deb8" stroke="#b8cda0" stroke-width="0.5"/>
+        <rect x="185" y="14" width="48" height="32" rx="4" fill="#d0deb8" stroke="#b8cda0" stroke-width="0.5"/>
+        <rect x="250" y="8" width="65" height="50" rx="4" fill="#d0deb8" stroke="#b8cda0" stroke-width="0.5"/>
+        <rect x="10" y="68" width="38" height="55" rx="4" fill="#d0deb8" stroke="#b8cda0" stroke-width="0.5"/>
+        <rect x="185" y="62" width="55" height="42" rx="4" fill="#d0deb8" stroke="#b8cda0" stroke-width="0.5"/>
+        <rect x="255" y="72" width="50" height="38" rx="4" fill="#d0deb8" stroke="#b8cda0" stroke-width="0.5"/>
+        <rect x="20" y="152" width="65" height="48" rx="4" fill="#d0deb8" stroke="#b8cda0" stroke-width="0.5"/>
+        <rect x="190" y="145" width="75" height="55" rx="4" fill="#d0deb8" stroke="#b8cda0" stroke-width="0.5"/>
+        <rect x="275" y="155" width="42" height="65" rx="4" fill="#d0deb8" stroke="#b8cda0" stroke-width="0.5"/>
+      </svg>
+      <div class="gps-ring"></div>
+      <div class="gps-dot"></div>
+      ${stops.map((s,i) => `
+        <div class="poi-marker ${s.state}"
+          style="left:${s.x};top:${s.y};transform:translate(-50%,-50%);"
+          onclick="selectStop(${i})"
+          title="${s.name}">${i+1}</div>`).join("")}
+      <div class="gps-alert">
+        <div class="gps-dot-sm"></div>
+        GPS actief · Stop 1 in de buurt!
+      </div>
+    </div>
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="stop-pills">
+        ${stops.map((s,i) => `
+          <button class="stop-pill ${s.state==='active'?'active':s.state==='visited'?'done':''}" onclick="selectStop(${i})">
+            ${i+1}. ${s.name.split(" ")[0]}
+          </button>`).join("")}
+      </div>
+      <div class="now-label">Nu spelend · stop 1 van 7</div>
+      <div class="stop-title-text" id="stop-title">Grote Markt</div>
+      <div class="stop-desc-text" id="stop-desc">Het kloppend hart van de stad, omringd door historische gevels uit de 16e eeuw.</div>
+      <div class="progress-row">
+        <span class="prog-time" id="prog-start">1:12</span>
+        <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:${progress}%"></div></div>
+        <span class="prog-time">3:05</span>
+      </div>
+      <div class="controls">
+        <button class="ctrl" onclick="skipBack()" title="Vorige"><i class="ti ti-player-skip-back" style="font-size:20px"></i></button>
+        <button class="ctrl" title="-15s"><i class="ti ti-rotate-clockwise" style="font-size:18px;transform:scaleX(-1)"></i></button>
+        <button class="play-btn" id="play-btn" onclick="togglePlay()">
+          <i class="ti ti-player-play" id="play-icon" style="font-size:20px"></i>
+        </button>
+        <button class="ctrl" title="+15s"><i class="ti ti-rotate-clockwise" style="font-size:18px"></i></button>
+        <button class="ctrl" onclick="skipNext()" title="Volgende"><i class="ti ti-player-skip-forward" style="font-size:20px"></i></button>
+      </div>
+    </div>`;
+}
+
+function profileHTML() {
+  return `
+    <div class="screen-header">
+      <div class="screen-title">Profiel</div>
+    </div>
+    <div class="screen-scroll">
+      <div style="display:flex;align-items:center;gap:14px;padding:4px 0 18px;border-bottom:0.5px solid var(--border);margin-bottom:16px;">
+        <div class="avatar">JD</div>
+        <div>
+          <div style="font-size:15px;font-weight:600;color:var(--text);">Jan de Vries</div>
+          <div style="font-size:12px;color:var(--text2);">jan@email.nl</div>
+        </div>
+      </div>
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Mijn tours</div>
+      <div style="border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;">
+        <div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text);">Historisch stadscentrum</div>
+            <div style="font-size:11px;color:var(--text2);">1 van 7 stops gedaan</div>
+          </div>
+          <span style="font-size:10px;background:var(--green-light);color:var(--green);padding:3px 8px;border-radius:10px;font-weight:500;">Actief</span>
+        </div>
+      </div>
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Statistieken</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Tours gedaan</div><div class="stat-val">1</div></div>
+        <div class="stat-card"><div class="stat-label">Km gewandeld</div><div class="stat-val">0.4</div></div>
+        <div class="stat-card"><div class="stat-label">Stops bezocht</div><div class="stat-val">2</div></div>
+        <div class="stat-card"><div class="stat-label">Min geluisterd</div><div class="stat-val">14</div></div>
+      </div>
+      <button style="width:100%;padding:10px;background:none;border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;margin-top:4px;">Uitloggen</button>
+    </div>`;
+}
+
+function showScreen(name) {
+  clearInterval(progressTimer);
+  playing = false;
+  document.getElementById('screen').innerHTML =
+    name === 'tours' ? toursHTML() :
+    name === 'active' ? activeHTML() : profileHTML();
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('nav-' + name).classList.add('active');
+}
+
+function togglePlay() {
+  playing = !playing;
+  const icon = document.getElementById('play-icon');
+  if (icon) icon.className = playing ? 'ti ti-player-pause' : 'ti ti-player-play';
+  clearInterval(progressTimer);
+  if (playing) {
+    progressTimer = setInterval(() => {
+      progress = Math.min(100, progress + 0.5);
+      const fill = document.getElementById('prog-fill');
+      if (fill) fill.style.width = progress + '%';
+      const secs = Math.round((progress / 100) * 185);
+      const m = Math.floor(secs / 60), s = secs % 60;
+      const el = document.getElementById('prog-start');
+      if (el) el.textContent = m + ':' + String(s).padStart(2, '0');
+      if (progress >= 100) { clearInterval(progressTimer); playing = false; }
+    }, 200);
+  }
+}
+
+function selectStop(i) {
+  currentStop = i;
+  const s = stops[i];
+  const t = document.getElementById('stop-title');
+  const d = document.getElementById('stop-desc');
+  if (t) t.textContent = s.name;
+  if (d) d.textContent = s.desc;
+  progress = 0;
+  const fill = document.getElementById('prog-fill');
+  if (fill) fill.style.width = '0%';
+  document.querySelectorAll('.stop-pill').forEach((el, idx) => {
+    el.className = 'stop-pill' + (idx === i ? ' active' : idx < i ? ' done' : '');
+  });
+}
+
+function skipBack() { if (currentStop > 0) selectStop(currentStop - 1); }
+function skipNext() { if (currentStop < stops.length - 1) selectStop(currentStop + 1); }
+
+function buyTour(id) {
+  const t = tours.find(x => x.id === id);
+  if (t) { t.owned = true; showScreen('active'); }
+}
+
+showScreen('tours');
+document.getElementById('nav-tours').classList.add('active');
+</script>
+</body>
+</html>
